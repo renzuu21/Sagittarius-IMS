@@ -1,0 +1,31 @@
+ session_start();
+    if(isset($_SESSION{'user'})) header('location: dashboard.php');
+
+     $error_message = '';
+
+    if($_POST){
+        include('database/connection.php');
+
+        $username = $_POST['username'];
+        $password = $_POST['password'];
+
+        $stmt = $conn->prepare("SELECT * FROM user");
+        $stmt->execute();
+        $stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+        $users = $stmt->fetchAll();
+
+        $user_exist = false;
+        foreach($users as $user){
+            $upass = $user['password'];        
+            
+            if(password_verify($password, $upass)){
+                $user_exist = true;
+                $_SESSION['user'] = $user;
+                break;
+            }
+        }
+    }
+    if($user_exist) header('Location: dashboard.php');
+    else $error_message = 'Please make sure that username and password are correct.';
+    
